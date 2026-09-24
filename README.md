@@ -34,7 +34,7 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: phases 1–4 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
+Status: phases 1–5 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
 Tools run in galago's simulated mode unless you pass `--live`.
 
 ## Quick start (simulated, no hardware)
@@ -74,6 +74,18 @@ answering; without a terminal and without that flag, a live run is refused.
 Workcell files stay on the lab machine: `rhylthyme publish` and `rhylthyme
 analyze` refuse them, programs name tools only by role, and run records hold no
 tool addresses.
+
+## Tools are resources
+
+Each tool a program uses is a resource of capacity 1, so two steps never send
+commands to the same shaker at once: the second waits until the first is done.
+A tool needs no person (actor) while it works, so hand steps and instrument
+steps run side by side. To let a tool take more than one command at a time,
+declare a constraint with its name:
+
+```json
+"resourceConstraints": [{ "task": "shaker", "maxConcurrent": 2, "description": "two-deck shaker" }]
+```
 
 ## When an instrument fails
 
