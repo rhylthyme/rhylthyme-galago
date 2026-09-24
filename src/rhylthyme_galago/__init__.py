@@ -1,8 +1,16 @@
 """Drive galago-tools lab instruments from Rhylthyme programs."""
 
 from ._gen import GALAGO_TOOLS_COMMIT, GALAGO_TOOLS_VERSION
+from .checks import Issue, check_program
 from .client import FakeToolClient, GrpcToolClient, ToolClient, ToolReply, ToolStatus
-from .commands import TOOL_TYPES, CommandError, build_command, build_config
+from .commands import (
+    TOOL_TYPES,
+    CommandError,
+    build_command,
+    build_config,
+    commands_for,
+    validate_command,
+)
 from .executor import NOT_SENT, InstrumentExecutor, ToolCheck, instrument_tools
 from .workcell import ToolBinding, Workcell, WorkcellError, load_workcell
 
@@ -15,6 +23,7 @@ __all__ = [
     "GALAGO_TOOLS_VERSION",
     "GrpcToolClient",
     "InstrumentExecutor",
+    "Issue",
     "NOT_SENT",
     "TOOL_TYPES",
     "ToolBinding",
@@ -26,6 +35,9 @@ __all__ = [
     "WorkcellError",
     "build_command",
     "build_config",
+    "check_program",
+    "commands_for",
     "instrument_tools",
     "load_workcell",
+    "validate_command",
 ]

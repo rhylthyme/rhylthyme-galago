@@ -34,7 +34,7 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: phase 1 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
+Status: phases 1–2 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
 Tools always run in galago's simulated mode for now.
 
 ## Quick start (simulated, no hardware)
@@ -58,6 +58,24 @@ rhylthyme run examples/shake-plate.json --workcell examples/workcell-simulated.j
 ```
 
 The run record (`rhylthyme runs`) marks the shake step `endedBy: "instrument"`.
+
+## Checking programs
+
+`rhylthyme validate` checks every instrument step's command and params against
+galago's own definitions, naming the step, tool, command and field:
+
+```text
+$ rhylthyme validate shake.json --workcell lab.json
+  - [instrument_invalid_command] Step 'shake': shaker (bioshake) start_shake: unknown param 'rpm' (takes speed, acceleration, duration)
+```
+
+Without `--workcell`, steps are checked against their `toolType`; steps with
+neither get an `instrument_unchecked` warning. With `--workcell`, it also reports
+tools the workcell lacks and `toolType`s that disagree with it. `rhylthyme run`
+runs the same checks before configuring any tool.
+
+From Python: `rhylthyme_galago.validate_command(tool_type, command, params)` and
+`check_program(program, workcell=None)`.
 
 ## Development
 
