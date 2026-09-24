@@ -34,8 +34,9 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: phases 1–8 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
-Tools run in galago's simulated mode unless you pass `--live`.
+Status: alpha ([plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1); the
+web live-view bridge is still to come). Tools run in galago's simulated mode
+unless you pass `--live`.
 
 ## Quick start (simulated, no hardware)
 
@@ -49,12 +50,15 @@ python3.9 -m venv .venv-galago
 .venv-galago/bin/galago-serve --tool bioshake --port 50710 &
 
 # 2. Rhylthyme with instrument support
-python3 -m venv .venv && source .venv/bin/activate
-# --workcell is on rhylthyme-cli-runner main; neither package is on PyPI with it yet
-pip install "git+https://github.com/rhylthyme/rhylthyme-cli-runner" ./
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install "rhylthyme[galago]"
 
-# 3. Run the example; press s to start, q to quit
-rhylthyme run examples/shake-plate.json --workcell examples/workcell-simulated.json
+# 3. The example program, and a workcell pointing at that Bioshake
+curl -sO https://raw.githubusercontent.com/rhylthyme/rhylthyme-galago/main/examples/shake-plate.json
+curl -sO https://raw.githubusercontent.com/rhylthyme/rhylthyme-galago/main/examples/workcell-simulated.json
+
+# 4. Run it; press s to start, q to quit
+rhylthyme run shake-plate.json --workcell workcell-simulated.json
 ```
 
 While the command runs, the runner shows the step with a `[shaker]` badge and
@@ -74,7 +78,7 @@ the tool returned:
 
 ## A three-tool example
 
-`examples/passage-check.json` fetches a plate from a Liconic incubator, shakes it
+`examples/passage-check.json` (in this repo) fetches a plate from a Liconic incubator, shakes it
 on a Bioshake, images it on a Cytation, has someone check the media, and stores
 it again, while media is warmed and aliquoted by hand on a second track:
 
