@@ -34,8 +34,8 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: phases 1–2 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
-Tools always run in galago's simulated mode for now.
+Status: phases 1–3 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
+Tools run in galago's simulated mode unless you pass `--live`.
 
 ## Quick start (simulated, no hardware)
 
@@ -58,6 +58,22 @@ rhylthyme run examples/shake-plate.json --workcell examples/workcell-simulated.j
 ```
 
 The run record (`rhylthyme runs`) marks the shake step `endedBy: "instrument"`.
+
+## Real hardware
+
+```bash
+rhylthyme run shake.json --workcell lab.json --live
+```
+
+`--live` first lists each tool (address and current status, read without
+configuring anything) and every instrument command the run will send, then asks
+you to type `live`. Only then are the tools configured for real; the run starts
+only if every tool reports READY. Scripts pass `--confirm-live` instead of
+answering; without a terminal and without that flag, a live run is refused.
+
+Workcell files stay on the lab machine: `rhylthyme publish` and `rhylthyme
+analyze` refuse them, programs name tools only by role, and run records hold no
+tool addresses.
 
 ## Checking programs
 
