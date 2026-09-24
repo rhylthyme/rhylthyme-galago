@@ -11,6 +11,7 @@ from .commands import (
     commands_for,
     validate_command,
 )
+from .estimates import DEFAULT_SECONDS, Estimate, fill_durations
 from .executor import NOT_SENT, TIMEOUT, InstrumentExecutor, ToolCheck, instrument_tools
 from .workcell import ToolBinding, Workcell, WorkcellError, load_workcell
 
@@ -18,6 +19,8 @@ __version__ = "0.1.0a0"
 
 __all__ = [
     "CommandError",
+    "DEFAULT_SECONDS",
+    "Estimate",
     "FakeToolClient",
     "GALAGO_TOOLS_COMMIT",
     "GALAGO_TOOLS_VERSION",
@@ -38,6 +41,7 @@ __all__ = [
     "build_config",
     "check_program",
     "commands_for",
+    "fill_durations",
     "instrument_tools",
     "load_workcell",
     "validate_command",

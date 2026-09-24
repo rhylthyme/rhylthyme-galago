@@ -178,3 +178,23 @@ def test_shutdown_mid_command_leaves_no_worker_threads(bioshake_server):
     while any(t.name.startswith("rhylthyme-galago") for t in threading.enumerate()):
         assert time.time() < deadline, "worker thread still blocked in the gRPC call"
         time.sleep(0.05)
+
+
+def test_fill_durations_asks_the_real_tool(bioshake_server):
+    from rhylthyme_galago import fill_durations, load_workcell
+
+    workcell = load_workcell(
+        {"tools": [{"name": "shaker", "type": "bioshake", "host": "localhost",
+                    "port": bioshake_server}]}
+    )
+    program = json.loads((EXAMPLES / "shake-plate.json").read_text())
+
+    # galago answers NOT_READY until a tool is configured; planning never
+    # configures tools (that could flip a live tool to simulated), so it
+    # falls back to the command's params.
+    _, [estimate] = fill_durations(program, workcell)
+    assert (estimate.source, estimate.seconds) == ("params", 5.0)
+
+    _shaker(bioshake_server).shutdown()  # configured (simulated), as in a run
+    _, [estimate] = fill_durations(program, workcell)
+    assert (estimate.step_id, estimate.source, estimate.seconds) == ("shake", "tool", 5.0)

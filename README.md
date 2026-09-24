@@ -34,7 +34,7 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: phases 1–6 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
+Status: phases 1–7 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
 Tools run in galago's simulated mode unless you pass `--live`.
 
 ## Quick start (simulated, no hardware)
@@ -112,6 +112,24 @@ runner shows what failed (tool, command, response code, message) and waits:
 - `A` twice aborts the program; the reason is kept in the run record (`context.abortReason`).
 
 Ctrl-C stops the run at once and names any command still in flight.
+
+## Planning with instrument durations
+
+An instrument step may leave out its `duration`: at run time it ends when the
+tool replies. For planning, `rhylthyme plan` and `rhylthyme analyze` fill one in
+and flag it in `metadata.durationEstimate`:
+
+```text
+$ rhylthyme plan shake.json planned.json --workcell lab.json
+Estimated instrument durations:
+  shake: 5 s (from shaker EstimateDuration)
+Makespan (by start triggers and durations): 11 s
+```
+
+The number comes from the tool's own `EstimateDuration` (with `--workcell`, for
+tools that are already configured; planning never configures a tool), else a
+duration-like command param (`duration`, `timeout`, ...), else 60 s. Authored
+durations are never changed.
 
 ## Checking programs
 
