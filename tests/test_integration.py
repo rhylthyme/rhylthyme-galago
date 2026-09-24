@@ -130,3 +130,51 @@ def test_example_program_runs_to_completion(bioshake_server, tmp_path):
     shake = runner.steps["shake"]
     # The Bioshake was asked for 5 s; at 10x that is ~50 s on the program clock.
     assert shake.end_time - shake.start_time >= 40
+
+
+def _shaker(port):
+    from rhylthyme_galago import InstrumentExecutor, load_workcell
+
+    workcell = load_workcell(
+        {"tools": [{"name": "shaker", "type": "bioshake", "host": "localhost",
+                    "port": port, "config": {"com_port": "COM3"}}]}
+    )
+    executor = InstrumentExecutor(workcell)
+    assert executor.prepare(["shaker"])[0].ready
+    return executor
+
+
+def test_timeout_against_a_real_tool(bioshake_server):
+    import threading
+
+    executor = _shaker(bioshake_server)
+    replies = []
+    done = threading.Event()
+    try:
+        executor.submit(
+            "shake",
+            {"tool": "shaker", "command": "start_shake",
+             "params": {"speed": 500, "duration": 20}, "timeoutSeconds": 1},
+            lambda key, reply: (replies.append(reply), done.set()),
+        )
+        assert done.wait(5)
+        assert replies[0].code == "TIMEOUT"
+    finally:
+        executor.shutdown()
+
+
+def test_shutdown_mid_command_leaves_no_worker_threads(bioshake_server):
+    import threading
+
+    executor = _shaker(bioshake_server)
+    executor.submit(
+        "shake",
+        {"tool": "shaker", "command": "start_shake", "params": {"speed": 500, "duration": 30}},
+        lambda key, reply: None,
+    )
+    time.sleep(0.5)
+    assert executor.shutdown() == ["shake"]
+    deadline = time.time() + 3
+    while any(t.name.startswith("rhylthyme-galago") for t in threading.enumerate()):
+        assert time.time() < deadline, "worker thread still blocked in the gRPC call"
+        time.sleep(0.05)

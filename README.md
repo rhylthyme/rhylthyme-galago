@@ -34,7 +34,7 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: phases 1–3 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
+Status: phases 1–4 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
 Tools run in galago's simulated mode unless you pass `--live`.
 
 ## Quick start (simulated, no hardware)
@@ -74,6 +74,19 @@ answering; without a terminal and without that flag, a live run is refused.
 Workcell files stay on the lab machine: `rhylthyme publish` and `rhylthyme
 analyze` refuse them, programs name tools only by role, and run records hold no
 tool addresses.
+
+## When an instrument fails
+
+Any reply other than SUCCESS (a driver error, a tool that is unreachable or
+not ready) and any command that outlives its `timeoutSeconds` marks the step
+**FAILED**. Nothing new starts; steps already running on other tools finish. The
+runner shows what failed (tool, command, response code, message) and waits:
+
+- `r` resends the command; if it succeeds the program carries on.
+- `x` marks the step done by hand (`endedBy: "skipped"`) and releases what depends on it.
+- `A` twice aborts the program; the reason is kept in the run record (`context.abortReason`).
+
+Ctrl-C stops the run at once and names any command still in flight.
 
 ## Checking programs
 

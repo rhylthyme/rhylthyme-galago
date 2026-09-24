@@ -9,7 +9,7 @@ thread (the Rhylthyme runner puts it on its command queue).
 import threading
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Mapping
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple
 
 from .client import GrpcToolClient, ToolClient, ToolReply, ToolStatus
 from .commands import CommandError, build_command, build_config
@@ -20,6 +20,13 @@ OnReply = Callable[[str, ToolReply], None]
 
 #: Response code for a step whose command could not be sent at all.
 NOT_SENT = "NOT_SENT"
+
+#: Response code for a command with no reply within its timeoutSeconds.
+TIMEOUT = "TIMEOUT"
+
+#: Extra seconds the gRPC deadline allows past timeoutSeconds, so the worker
+#: thread is eventually freed after the executor has already reported TIMEOUT.
+DEADLINE_GRACE = 5.0
 
 #: Tool statuses a run can start against, by mode.
 READY_STATUSES = {True: {"SIMULATED"}, False: {"READY"}}
@@ -52,7 +59,9 @@ class InstrumentExecutor:
         self._pool = ThreadPoolExecutor(
             max_workers=max_workers, thread_name_prefix="rhylthyme-galago"
         )
-        self._in_flight: Dict[str, Future] = {}
+        # key -> (token, future, timer); the token makes the first outcome
+        # (reply or timeout) win and drops anything later for that submission
+        self._in_flight: Dict[str, Tuple[object, Future, Optional[threading.Timer]]] = {}
         self._lock = threading.Lock()
 
     def client(self, tool: str) -> ToolClient:
@@ -88,18 +97,38 @@ class InstrumentExecutor:
             on_reply(key, ToolReply(NOT_SENT, str(e)))
             return
         timeout = instrument.get("timeoutSeconds")
+        token = object()
 
-        def run() -> None:
-            try:
-                reply = client.execute(command, timeout=timeout)
-            except Exception as e:  # a broken client must still end the step
-                reply = ToolReply(NOT_SENT, f"{type(e).__name__}: {e}")
+        def deliver(reply: ToolReply) -> None:
             with self._lock:
-                self._in_flight.pop(key, None)
+                entry = self._in_flight.get(key)
+                if entry is None or entry[0] is not token:
+                    return  # timed out, retried or shut down meanwhile
+                del self._in_flight[key]
+            if entry[2] is not None:
+                entry[2].cancel()
             on_reply(key, reply)
 
+        def run() -> None:
+            deadline = timeout + DEADLINE_GRACE if timeout else None
+            try:
+                reply = client.execute(command, timeout=deadline)
+            except Exception as e:  # a broken client must still end the step
+                reply = ToolReply(NOT_SENT, f"{type(e).__name__}: {e}")
+            deliver(reply)
+
+        timer = None
+        if timeout:
+            timer = threading.Timer(
+                timeout,
+                deliver,
+                [ToolReply(TIMEOUT, f"no reply after {timeout:g} s")],
+            )
+            timer.daemon = True
         with self._lock:
-            self._in_flight[key] = self._pool.submit(run)
+            self._in_flight[key] = (token, self._pool.submit(run), timer)
+        if timer is not None:
+            timer.start()
 
     def in_flight(self) -> List[str]:
         with self._lock:
@@ -107,11 +136,15 @@ class InstrumentExecutor:
 
     def shutdown(self) -> List[str]:
         """Stop accepting work; return the keys whose commands never replied."""
-        pending = self.in_flight()
-        self._pool.shutdown(wait=False, cancel_futures=True)
         with self._lock:
+            pending = sorted(self._in_flight)
+            for _, _, timer in self._in_flight.values():
+                if timer is not None:
+                    timer.cancel()
+            self._in_flight.clear()
             clients = list(self._clients.values())
             self._clients.clear()
+        self._pool.shutdown(wait=False, cancel_futures=True)
         for client in clients:
             client.close()
         return pending
@@ -131,6 +164,7 @@ def instrument_tools(program: Mapping[str, Any]) -> List[str]:
 __all__ = [
     "InstrumentExecutor",
     "NOT_SENT",
+    "TIMEOUT",
     "ToolCheck",
     "instrument_tools",
 ]

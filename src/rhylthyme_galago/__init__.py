@@ -11,7 +11,7 @@ from .commands import (
     commands_for,
     validate_command,
 )
-from .executor import NOT_SENT, InstrumentExecutor, ToolCheck, instrument_tools
+from .executor import NOT_SENT, TIMEOUT, InstrumentExecutor, ToolCheck, instrument_tools
 from .workcell import ToolBinding, Workcell, WorkcellError, load_workcell
 
 __version__ = "0.1.0a0"
@@ -25,6 +25,7 @@ __all__ = [
     "InstrumentExecutor",
     "Issue",
     "NOT_SENT",
+    "TIMEOUT",
     "TOOL_TYPES",
     "ToolBinding",
     "ToolCheck",

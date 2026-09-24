@@ -1,9 +1,11 @@
 import threading
+import time
 
 import pytest
 
 from rhylthyme_galago import (
     NOT_SENT,
+    TIMEOUT,
     FakeToolClient,
     InstrumentExecutor,
     ToolReply,
@@ -64,7 +66,8 @@ def test_submit_replies_from_the_tool():
     shaker.gate.set()
     assert done.wait(2)
     assert replies["shake"].ok
-    assert shaker.executed == [{"command": "start_shake", "timeout": 30}]
+    # The gRPC deadline allows a grace period past timeoutSeconds
+    assert shaker.executed == [{"command": "start_shake", "timeout": 35.0}]
     assert executor.in_flight() == []
 
 
@@ -120,3 +123,57 @@ def test_instrument_tools():
         ]
     }
     assert instrument_tools(program) == ["incubator", "shaker"]
+
+
+def test_timeout_reports_once_and_drops_the_late_reply():
+    shaker = FakeToolClient(gate=threading.Event())
+    executor = make({"shaker": shaker})
+    calls = []
+    done = threading.Event()
+
+    def on_reply(key, reply):
+        calls.append(reply)
+        done.set()
+
+    executor.submit("shake", dict(SHAKE, timeoutSeconds=0.2), on_reply)
+    assert done.wait(2)
+    assert calls[0].code == TIMEOUT and "no reply after 0.2 s" in calls[0].error_message
+    assert executor.in_flight() == []
+    shaker.gate.set()  # the instrument answers after all
+    time.sleep(0.2)
+    assert len(calls) == 1
+
+
+def test_retry_after_timeout_gets_its_own_reply():
+    gate = threading.Event()
+    shaker = FakeToolClient(gate=gate)
+    executor = make({"shaker": shaker})
+    calls = []
+    executor.submit("shake", dict(SHAKE, timeoutSeconds=0.1), lambda k, r: calls.append(r))
+    time.sleep(0.3)
+    assert [r.code for r in calls] == [TIMEOUT]
+    shaker.gate = None  # the retried command is answered straight away
+    executor.submit("shake", SHAKE, lambda k, r: calls.append(r))
+    gate.set()
+    time.sleep(0.2)
+    assert [r.code for r in calls] == [TIMEOUT, "SUCCESS"]
+
+
+def test_reply_before_timeout_cancels_the_timer():
+    executor = make({"shaker": FakeToolClient()})
+    calls = []
+    executor.submit("shake", dict(SHAKE, timeoutSeconds=0.2), lambda k, r: calls.append(r))
+    time.sleep(0.4)
+    assert [r.code for r in calls] == ["SUCCESS"]
+
+
+def test_shutdown_cancels_pending_timeouts():
+    shaker = FakeToolClient(gate=threading.Event())
+    executor = make({"shaker": shaker})
+    calls = []
+    executor.submit("shake", dict(SHAKE, timeoutSeconds=0.1), lambda k, r: calls.append(r))
+    assert executor.shutdown() == ["shake"]
+    time.sleep(0.3)
+    shaker.gate.set()
+    time.sleep(0.1)
+    assert calls == []
