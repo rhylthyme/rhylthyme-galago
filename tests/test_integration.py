@@ -8,6 +8,7 @@ GALAGO_SERVE to its path, or create ``.venv-galago`` in this repo::
 Skipped when neither is available.
 """
 
+import contextlib
 import json
 import os
 import shutil
@@ -41,27 +42,28 @@ def _free_port():
         return s.getsockname()[1]
 
 
-@pytest.fixture
-def bioshake_server(tmp_path):
+@contextlib.contextmanager
+def _serving(tool, log_dir):
+    """Start ``galago-serve --tool TOOL`` on a free port; yield the port."""
     serve = _galago_serve()
     if not serve:
         pytest.skip("galago-serve not found (set GALAGO_SERVE or create .venv-galago)")
     port = _free_port()
-    log = open(tmp_path / "galago-serve.log", "w")
+    log = open(Path(log_dir) / f"galago-serve-{tool}.log", "w")
     # galago-serve hands the server to a child process and may exit, so it
     # gets its own process group and the whole group is stopped afterwards.
     proc = subprocess.Popen(
-        [serve, "--port", str(port), "--tool", "bioshake"],
+        [serve, "--port", str(port), "--tool", tool],
         stdout=log,
         stderr=subprocess.STDOUT,
         start_new_session=True,
     )
     client = GrpcToolClient(f"localhost:{port}", connect_timeout=1.0)
     try:
-        deadline = time.time() + 30
+        deadline = time.time() + 60
         while client.status().status == "OFFLINE":
             if time.time() > deadline:
-                pytest.fail(f"galago-serve did not start; see {log.name}")
+                pytest.fail(f"galago-serve --tool {tool} did not start; see {log.name}")
             time.sleep(0.2)
         yield port
     finally:
@@ -74,6 +76,12 @@ def bioshake_server(tmp_path):
         except subprocess.TimeoutExpired:
             os.killpg(proc.pid, signal.SIGKILL)
         log.close()
+
+
+@pytest.fixture
+def bioshake_server(tmp_path):
+    with _serving("bioshake", tmp_path) as port:
+        yield port
 
 
 def test_simulated_bioshake_replies(bioshake_server):
@@ -198,3 +206,49 @@ def test_fill_durations_asks_the_real_tool(bioshake_server):
     _shaker(bioshake_server).shutdown()  # configured (simulated), as in a run
     _, [estimate] = fill_durations(program, workcell)
     assert (estimate.step_id, estimate.source, estimate.seconds) == ("shake", "tool", 5.0)
+
+
+def test_passage_check_runs_on_three_simulated_tools(tmp_path):
+    """The README's worked example: liconic + bioshake + cytation, people in between."""
+    runner_mod = pytest.importorskip("rhylthyme_cli_runner.program_runner")
+    from rhylthyme_cli_runner.history.recorder import RunRecorder
+    from rhylthyme_cli_runner.instruments import attach_instruments
+
+    workcell = json.loads((EXAMPLES / "workcell-cell-culture.json").read_text())
+    program = json.loads((EXAMPLES / "passage-check.json").read_text())
+    with contextlib.ExitStack() as stack:
+        for tool in workcell["tools"]:
+            tool["port"] = stack.enter_context(_serving(tool["type"], tmp_path))
+
+        runner = runner_mod.ProgramRunner(program, time_scale=20.0)
+        events = []
+        runner.add_event_listener(lambda kind, data: events.append((kind, data)))
+        recorder = RunRecorder(runner, source_program=program, runs_dir=str(tmp_path)).attach()
+        session = attach_instruments(runner, workcell)
+        try:
+            runner.start()
+            runner.command_queue.put("start_program")
+            deadline = time.time() + 90
+            while runner.is_running or not runner.program_started:
+                runner.update()
+                assert time.time() < deadline, {s: st.status for s, st in runner.steps.items()}
+                time.sleep(0.02)
+        finally:
+            session.shutdown()
+
+    Completed = runner_mod.StepStatus.COMPLETED
+    assert all(step.status == Completed for step in runner.steps.values())
+    culture = ["fetch-plate", "resuspend", "image", "look", "store-plate"]
+    started = [d["step_id"] for k, d in events if k == "step_started" and d["step_id"] in culture]
+    assert started == culture
+    ended_by = {d["step_id"]: d["ended_by"] for k, d in events if k == "step_completed"}
+    assert {s: ended_by[s] for s in culture} == {
+        "fetch-plate": "instrument", "resuspend": "instrument", "image": "instrument",
+        "look": "timer", "store-plate": "instrument",
+    }
+    record = json.loads(open(recorder.finalize()).read())
+    assert record["outcome"] == "completed"
+    replies = {s["stepId"]: s["instrument"]["replies"] for s in record["steps"] if "instrument" in s}
+    assert {k: [r["code"] for r in v] for k, v in replies.items()} == {
+        "fetch-plate": ["SUCCESS"], "resuspend": ["SUCCESS"], "image": ["SUCCESS"], "store-plate": ["SUCCESS"],
+    }

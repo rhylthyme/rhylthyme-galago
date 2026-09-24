@@ -1,0 +1,79 @@
+{
+  "programId": "galago-passage-check",
+  "name": "Passage check on a simulated workcell",
+  "description": "A short cell-culture check across three galago tools with people in between: fetch a plate from the incubator, shake it, image it for confluence, have someone look at the media, and put it back. Meanwhile media is warmed and aliquoted by hand.",
+  "version": "1.0.0",
+  "environmentType": "laboratory",
+  "startTrigger": { "type": "manual" },
+  "tracks": [
+    {
+      "trackId": "culture",
+      "name": "Culture plate",
+      "steps": [
+        {
+          "stepId": "fetch-plate",
+          "name": "Fetch plate from the incubator",
+          "instrument": {
+            "tool": "incubator", "toolType": "liconic", "command": "fetch_plate",
+            "params": { "cassette": 1, "level": 2 }, "timeoutSeconds": 120
+          },
+          "startTrigger": { "type": "programStart" }
+        },
+        {
+          "stepId": "resuspend",
+          "name": "Shake to resuspend",
+          "instrument": {
+            "tool": "shaker", "toolType": "bioshake", "command": "start_shake",
+            "params": { "speed": 800, "acceleration": 5, "duration": 10 }, "timeoutSeconds": 60
+          },
+          "startTrigger": { "type": "afterStep", "stepId": "fetch-plate" }
+        },
+        {
+          "stepId": "image",
+          "name": "Image for confluence",
+          "instrument": {
+            "tool": "imager", "toolType": "cytation", "command": "start_read",
+            "params": { "protocol_file": "confluence.prt", "experiment_name": "passage-check" },
+            "timeoutSeconds": 600
+          },
+          "startTrigger": { "type": "afterStep", "stepId": "resuspend" }
+        },
+        {
+          "stepId": "look",
+          "name": "Check media colour and confluence",
+          "description": "Yellowing media or confluence over 80% means passage today.",
+          "duration": { "type": "fixed", "seconds": 20 },
+          "startTrigger": { "type": "afterStep", "stepId": "image" }
+        },
+        {
+          "stepId": "store-plate",
+          "name": "Return plate to the incubator",
+          "instrument": {
+            "tool": "incubator", "toolType": "liconic", "command": "store_plate",
+            "params": { "cassette": 1, "level": 2 }, "timeoutSeconds": 120
+          },
+          "startTrigger": { "type": "afterStep", "stepId": "look" }
+        }
+      ]
+    },
+    {
+      "trackId": "media",
+      "name": "Media",
+      "steps": [
+        {
+          "stepId": "warm-media",
+          "name": "Warm media in the bead bath",
+          "duration": { "type": "fixed", "seconds": 25 },
+          "startTrigger": { "type": "programStart" }
+        },
+        {
+          "stepId": "aliquot-media",
+          "name": "Aliquot fresh media",
+          "duration": { "type": "fixed", "seconds": 10 },
+          "startTrigger": { "type": "afterStep", "stepId": "warm-media" }
+        }
+      ]
+    }
+  ],
+  "resourceConstraints": []
+}

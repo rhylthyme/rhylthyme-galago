@@ -34,7 +34,7 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: phases 1–7 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
+Status: phases 1–8 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
 Tools run in galago's simulated mode unless you pass `--live`.
 
 ## Quick start (simulated, no hardware)
@@ -71,6 +71,26 @@ the tool returned:
   ]
 }
 ```
+
+## A three-tool example
+
+`examples/passage-check.json` fetches a plate from a Liconic incubator, shakes it
+on a Bioshake, images it on a Cytation, has someone check the media, and stores
+it again, while media is warmed and aliquoted by hand on a second track:
+
+```bash
+for t in liconic:50721 bioshake:50722 cytation:50723; do
+  .venv-galago/bin/galago-serve --tool ${t%%:*} --port ${t##*:} &
+done
+rhylthyme run examples/passage-check.json --workcell examples/workcell-cell-culture.json
+```
+
+It runs end to end in CI against these simulated servers
+(`tests/test_integration.py`).
+
+galago-tools 0.19.9 cannot simulate an Opentrons `run_program` (its simulated
+dispatch passes an argument `RunProgram` does not take, so the tool answers
+`DRIVER_ERROR`); other Opentrons commands, and real OT-2 runs, are unaffected.
 
 ## Real hardware
 

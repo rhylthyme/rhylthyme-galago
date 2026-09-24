@@ -1,0 +1,12 @@
+{
+  "id": "simulated-cell-culture",
+  "name": "Simulated cell-culture workcell (galago-serve on localhost)",
+  "tools": [
+    { "name": "incubator", "type": "liconic", "host": "localhost", "port": 50721,
+      "config": { "com_port": "COM4" }, "description": "galago-serve --tool=liconic --port=50721" },
+    { "name": "shaker", "type": "bioshake", "host": "localhost", "port": 50722,
+      "config": { "com_port": "COM3" }, "description": "galago-serve --tool=bioshake --port=50722" },
+    { "name": "imager", "type": "cytation", "host": "localhost", "port": 50723,
+      "description": "galago-serve --tool=cytation --port=50723" }
+  ]
+}
