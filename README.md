@@ -34,7 +34,7 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: phases 1–5 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
+Status: phases 1–6 of the [plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1).
 Tools run in galago's simulated mode unless you pass `--live`.
 
 ## Quick start (simulated, no hardware)
@@ -57,7 +57,20 @@ pip install "git+https://github.com/rhylthyme/rhylthyme-cli-runner" ./
 rhylthyme run examples/shake-plate.json --workcell examples/workcell-simulated.json
 ```
 
-The run record (`rhylthyme runs`) marks the shake step `endedBy: "instrument"`.
+While the command runs, the runner shows the step with a `[shaker]` badge and
+"waiting on shaker"; the run record (`rhylthyme runs`) marks it
+`endedBy: "instrument"` and keeps every reply, retries included, with any data
+the tool returned:
+
+```json
+"instrument": {
+  "tool": "shaker", "command": "start_shake",
+  "replies": [
+    { "attempt": 1, "at": 3.0, "code": "DRIVER_ERROR", "errorMessage": "lid open" },
+    { "attempt": 2, "at": 41.2, "code": "SUCCESS", "metadata": { "wells": { "A1": 0.41 } } }
+  ]
+}
+```
 
 ## Real hardware
 
