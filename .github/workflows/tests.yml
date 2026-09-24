@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # galago-tools runs on Python 3.9 in its own venv; the tests start its
+      # simulated tool servers (galago-serve) and talk to them over gRPC.
+      - uses: actions/setup-python@v5
+        id: py39
+        with:
+          python-version: "3.9"
+      - name: galago-tools (simulated tool servers)
+        run: |
+          ${{ steps.py39.outputs.python-path }} -m venv .venv-galago
+          .venv-galago/bin/pip install --quiet galago-tools==0.19.9
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: rhylthyme-galago and the Rhylthyme runner
+        run: |
+          python -m pip install --quiet --upgrade pip
+          pip install --quiet -e ".[dev]" "rhylthyme-cli-runner @ git+https://github.com/rhylthyme/rhylthyme-cli-runner"
+
+      - name: Unit tests
+        run: pytest -m "not integration"
+
+      - name: Integration tests (real galago servers, simulated)
+        env:
+          GALAGO_SERVE: .venv-galago/bin/galago-serve
+        run: pytest -m integration -rs
