@@ -15,7 +15,7 @@ from .estimates import DEFAULT_SECONDS, Estimate, fill_durations
 from .executor import NOT_SENT, TIMEOUT, InstrumentExecutor, ToolCheck, instrument_tools
 from .workcell import ToolBinding, Workcell, WorkcellError, load_workcell
 
-__version__ = "0.1.0a0"
+__version__ = "0.1.0a1"
 
 __all__ = [
     "CommandError",

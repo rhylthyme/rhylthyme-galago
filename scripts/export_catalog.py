@@ -65,6 +65,12 @@ def _fields(descriptor) -> dict:
 
 def catalog() -> dict:
     return {
+        "attribution": (
+            "Derived from the .proto files of galago-tools "
+            "(https://github.com/sciencecorp/galago-tools), Copyright 2025 - "
+            "Science Corporation, licensed under the Apache License, Version 2.0. "
+            "Exported by rhylthyme-galago scripts/export_catalog.py."
+        ),
         "galagoToolsVersion": GALAGO_TOOLS_VERSION,
         "galagoToolsCommit": GALAGO_TOOLS_COMMIT,
         "tools": {

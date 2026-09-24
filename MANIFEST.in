@@ -1,0 +1,6 @@
+include NOTICE
+recursive-include LICENSES *
+recursive-include proto *.proto LICENSE UPSTREAM.json
+recursive-include examples *.json
+recursive-include catalog *.json
+recursive-include scripts *.py

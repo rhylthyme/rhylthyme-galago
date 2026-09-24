@@ -1,0 +1,22 @@
+rhylthyme-galago
+Copyright 2026 Rhylthyme contributors
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes material derived from galago-tools
+(https://github.com/sciencecorp/galago-tools),
+Copyright 2025 - Science Corporation,
+licensed under the Apache License, Version 2.0 (see LICENSES/galago-tools-LICENSE):
+
+  - proto/galago/tools/grpc_interfaces/*.proto: galago-tools' .proto files,
+    copied without modification from the commit recorded in
+    proto/galago/UPSTREAM.json.
+  - src/rhylthyme_galago/_gen/: Python code generated from those .proto files
+    by scripts/refresh_protos.py. Modified: the proto import paths were moved
+    under the rhylthyme_galago._gen package before generation; message and
+    service definitions are unchanged.
+  - catalog/galago-commands.json: a JSON description of the commands and
+    parameters defined in those .proto files, derived by
+    scripts/export_catalog.py.
+
+rhylthyme-galago is not affiliated with or endorsed by Science Corporation.
+"galago" is used here only to identify the software this package works with.

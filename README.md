@@ -1,8 +1,19 @@
 # rhylthyme-galago
 
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/rhylthyme-galago)](https://pypi.org/project/rhylthyme-galago/)
+
 Run lab instruments from [Rhylthyme](https://rhylthyme.com) programs through
-[galago-tools](https://github.com/sciencecorp/galago-tools) (Science Corp's gRPC
-drivers for shakers, incubators, plate readers, liquid handlers and robot arms).
+**[galago-tools](https://github.com/sciencecorp/galago-tools)**, Science
+Corporation's open-source (Apache-2.0) gRPC drivers for more than 20 kinds of
+instrument: shakers, incubators, plate readers, imagers, liquid handlers and
+robot arms. galago-tools is the driver layer of Science's
+[Galago](https://github.com/sciencecorp/galago-core) lab-automation stack; this
+package lets Rhylthyme's planner and runner be the scheduler on top of it. It
+is an independent project, not affiliated with or endorsed by Science
+Corporation.
+
+![rhylthyme run with three galago tools: the shake step is waiting on the shaker](https://raw.githubusercontent.com/rhylthyme/rhylthyme-galago/main/docs/images/terminal-running.png)
 
 A step names a galago command; the runner sends it when the step starts, and the
 step ends when the instrument replies:
@@ -57,12 +68,14 @@ pip install "rhylthyme[galago]"
 curl -sO https://raw.githubusercontent.com/rhylthyme/rhylthyme-galago/main/examples/shake-plate.json
 curl -sO https://raw.githubusercontent.com/rhylthyme/rhylthyme-galago/main/examples/workcell-simulated.json
 
-# 4. Run it; press s to start, q to quit
+# 4. Run it: the tools are configured (simulated) and the run starts;
+#    p pauses, q quits
 rhylthyme run shake-plate.json --workcell workcell-simulated.json
 ```
 
 While the command runs, the runner shows the step with a `[shaker]` badge and
-"waiting on shaker"; the run record (`rhylthyme runs`) marks it
+"waiting on shaker" (screenshot above), and the shaker is held as a resource
+until it replies. The run record (`rhylthyme runs`) marks it
 `endedBy: "instrument"` and keeps every reply, retries included, with any data
 the tool returned:
 
@@ -90,7 +103,19 @@ rhylthyme run examples/passage-check.json --workcell examples/workcell-cell-cult
 ```
 
 It runs end to end in CI against these simulated servers
-(`tests/test_integration.py`).
+(`tests/test_integration.py`). The screenshot at the top of this page is this
+program, a few seconds in: the plate has been fetched, the Bioshake is running,
+and someone is warming media on the other track.
+
+## On the web
+
+Programs with instrument steps validate, visualize and publish on
+[rhylthyme.com](https://rhylthyme.com) and through the
+[Rhylthyme MCP server](https://mcp.rhylthyme.com/mcp) like any other: instrument
+steps carry a `[tool]` badge, and bars whose length is an estimate have a
+dotted outline. Workcells are never uploaded.
+
+![The web player: the shake step carries a [shaker] badge and a dotted outline](https://raw.githubusercontent.com/rhylthyme/rhylthyme-galago/main/docs/images/web-player.png)
 
 galago-tools 0.19.9 cannot simulate an Opentrons `run_program` (its simulated
 dispatch passes an argument `RunProgram` does not take, so the tool answers
@@ -137,6 +162,8 @@ runner shows what failed (tool, command, response code, message) and waits:
 
 Ctrl-C stops the run at once and names any command still in flight.
 
+![A timed-out imaging step: FAILED in red, the banner names the tool, command and code, and media warming carries on](https://raw.githubusercontent.com/rhylthyme/rhylthyme-galago/main/docs/images/terminal-failed.png)
+
 ## Planning with instrument durations
 
 An instrument step may leave out its `duration`: at run time it ends when the
@@ -149,6 +176,8 @@ Estimated instrument durations:
   shake: 5 s (from shaker EstimateDuration)
 Makespan (by start triggers and durations): 11 s
 ```
+
+![rhylthyme render of the three-tool example; dotted bars are estimated](https://raw.githubusercontent.com/rhylthyme/rhylthyme-galago/main/docs/images/passage-check-timeline.svg)
 
 The number comes from the tool's own `EstimateDuration` (with `--workcell`, for
 tools that are already configured; planning never configures a tool), else a
@@ -197,5 +226,18 @@ python scripts/refresh_protos.py                                      # regenera
 
 ## License
 
-Apache-2.0. The vendored galago-tools protos are Apache-2.0 too (Science
-Corporation); see `proto/galago/LICENSE`.
+rhylthyme-galago is licensed under the [Apache License 2.0](LICENSE).
+
+It includes material from [galago-tools](https://github.com/sciencecorp/galago-tools),
+Copyright 2025 - Science Corporation, also licensed under the Apache License
+2.0 ([copy](LICENSES/galago-tools-LICENSE)):
+
+- `proto/galago/`: galago-tools' `.proto` files, unmodified, pinned in
+  `proto/galago/UPSTREAM.json`;
+- `src/rhylthyme_galago/_gen/`: Python generated from them, with the proto
+  import paths moved under this package (each file says so in its header);
+- `catalog/galago-commands.json`: a JSON description of their commands.
+
+[NOTICE](NOTICE) lists these; the wheel and sdist carry `LICENSE`, `NOTICE` and
+`LICENSES/galago-tools-LICENSE`. galago-tools itself is not bundled: you install
+it separately, from Science Corporation.

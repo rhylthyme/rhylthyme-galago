@@ -4,10 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rhylthyme-galago"
-version = "0.1.0a0"
+version = "0.1.0a1"
 description = "Drive galago-tools lab instruments from Rhylthyme programs"
 readme = "README.md"
 license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "LICENSES/*"]
 requires-python = ">=3.12"
 authors = [{ name = "Rhylthyme" }]
 dependencies = [
