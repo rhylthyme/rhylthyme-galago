@@ -1,0 +1,34 @@
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from collections.abc import Mapping as _Mapping
+from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class Command(_message.Message):
+    __slots__ = ("run_local_script", "run_script")
+    class RunLocalScript(_message.Message):
+        __slots__ = ("path", "blocking")
+        PATH_FIELD_NUMBER: _ClassVar[int]
+        BLOCKING_FIELD_NUMBER: _ClassVar[int]
+        path: str
+        blocking: bool
+        def __init__(self, path: _Optional[str] = ..., blocking: _Optional[bool] = ...) -> None: ...
+    class RunScript(_message.Message):
+        __slots__ = ("script_content", "blocking")
+        SCRIPT_CONTENT_FIELD_NUMBER: _ClassVar[int]
+        BLOCKING_FIELD_NUMBER: _ClassVar[int]
+        script_content: str
+        blocking: bool
+        def __init__(self, script_content: _Optional[str] = ..., blocking: _Optional[bool] = ...) -> None: ...
+    RUN_LOCAL_SCRIPT_FIELD_NUMBER: _ClassVar[int]
+    RUN_SCRIPT_FIELD_NUMBER: _ClassVar[int]
+    run_local_script: Command.RunLocalScript
+    run_script: Command.RunScript
+    def __init__(self, run_local_script: _Optional[_Union[Command.RunLocalScript, _Mapping]] = ..., run_script: _Optional[_Union[Command.RunScript, _Mapping]] = ...) -> None: ...
+
+class Config(_message.Message):
+    __slots__ = ("python_exe",)
+    PYTHON_EXE_FIELD_NUMBER: _ClassVar[int]
+    python_exe: str
+    def __init__(self, python_exe: _Optional[str] = ...) -> None: ...

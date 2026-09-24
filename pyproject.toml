@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rhylthyme-galago"
+version = "0.1.0a0"
+description = "Drive galago-tools lab instruments from Rhylthyme programs"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12"
+authors = [{ name = "Rhylthyme" }]
+dependencies = [
+    # Floors match the generated stubs (scripts/refresh_protos.py).
+    "grpcio>=1.84.0",
+    "protobuf>=7.35.1,<8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "grpcio-tools==1.84.0"]
+
+[project.urls]
+Homepage = "https://rhylthyme.com"
+Source = "https://github.com/rhylthyme/rhylthyme-galago"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rhylthyme_galago = ["py.typed", "_gen/**/*.pyi"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: needs galago-tools servers (GALAGO_SERVE or .venv-galago)"]

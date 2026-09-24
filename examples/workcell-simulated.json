@@ -1,0 +1,14 @@
+{
+  "id": "simulated-bench",
+  "name": "Simulated bench (galago-serve on localhost)",
+  "tools": [
+    {
+      "name": "shaker",
+      "type": "bioshake",
+      "host": "localhost",
+      "port": 50710,
+      "config": { "com_port": "COM3" },
+      "description": "galago-serve --tool=bioshake --port=50710"
+    }
+  ]
+}

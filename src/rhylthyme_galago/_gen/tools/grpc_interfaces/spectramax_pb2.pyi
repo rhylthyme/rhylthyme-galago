@@ -1,0 +1,37 @@
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from collections.abc import Mapping as _Mapping
+from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class Command(_message.Message):
+    __slots__ = ("open_drawer", "close_drawer", "start_read")
+    class OpenDrawer(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class CloseDrawer(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class StartRead(_message.Message):
+        __slots__ = ("protocol_file", "experiment_name")
+        PROTOCOL_FILE_FIELD_NUMBER: _ClassVar[int]
+        EXPERIMENT_NAME_FIELD_NUMBER: _ClassVar[int]
+        protocol_file: str
+        experiment_name: str
+        def __init__(self, protocol_file: _Optional[str] = ..., experiment_name: _Optional[str] = ...) -> None: ...
+    OPEN_DRAWER_FIELD_NUMBER: _ClassVar[int]
+    CLOSE_DRAWER_FIELD_NUMBER: _ClassVar[int]
+    START_READ_FIELD_NUMBER: _ClassVar[int]
+    open_drawer: Command.OpenDrawer
+    close_drawer: Command.CloseDrawer
+    start_read: Command.StartRead
+    def __init__(self, open_drawer: _Optional[_Union[Command.OpenDrawer, _Mapping]] = ..., close_drawer: _Optional[_Union[Command.CloseDrawer, _Mapping]] = ..., start_read: _Optional[_Union[Command.StartRead, _Mapping]] = ...) -> None: ...
+
+class Config(_message.Message):
+    __slots__ = ("protocol_dir", "experiment_dir")
+    PROTOCOL_DIR_FIELD_NUMBER: _ClassVar[int]
+    EXPERIMENT_DIR_FIELD_NUMBER: _ClassVar[int]
+    protocol_dir: str
+    experiment_dir: str
+    def __init__(self, protocol_dir: _Optional[str] = ..., experiment_dir: _Optional[str] = ...) -> None: ...

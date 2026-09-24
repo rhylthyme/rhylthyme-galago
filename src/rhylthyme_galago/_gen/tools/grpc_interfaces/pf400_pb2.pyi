@@ -1,0 +1,212 @@
+from google.protobuf import struct_pb2 as _struct_pb2
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from collections.abc import Mapping as _Mapping
+from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class Command(_message.Message):
+    __slots__ = ("move", "grasp_plate", "release_plate", "transfer", "wait", "release", "engage", "unwind", "run_sequence", "retrieve_plate", "dropoff_plate", "pick_lid", "place_lid", "get_current_location", "jog", "raw_command", "register_motion_profile", "load_waypoints", "load_labware")
+    class RawCommand(_message.Message):
+        __slots__ = ("command",)
+        COMMAND_FIELD_NUMBER: _ClassVar[int]
+        command: str
+        def __init__(self, command: _Optional[str] = ...) -> None: ...
+    class GetCurrentLocation(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class Jog(_message.Message):
+        __slots__ = ("axis", "distance")
+        AXIS_FIELD_NUMBER: _ClassVar[int]
+        DISTANCE_FIELD_NUMBER: _ClassVar[int]
+        axis: str
+        distance: float
+        def __init__(self, axis: _Optional[str] = ..., distance: _Optional[float] = ...) -> None: ...
+    class PickLid(_message.Message):
+        __slots__ = ("labware", "location", "motion_profile", "pick_from_plate", "approach_height")
+        LABWARE_FIELD_NUMBER: _ClassVar[int]
+        LOCATION_FIELD_NUMBER: _ClassVar[int]
+        MOTION_PROFILE_FIELD_NUMBER: _ClassVar[int]
+        PICK_FROM_PLATE_FIELD_NUMBER: _ClassVar[int]
+        APPROACH_HEIGHT_FIELD_NUMBER: _ClassVar[int]
+        labware: str
+        location: str
+        motion_profile: str
+        pick_from_plate: bool
+        approach_height: float
+        def __init__(self, labware: _Optional[str] = ..., location: _Optional[str] = ..., motion_profile: _Optional[str] = ..., pick_from_plate: _Optional[bool] = ..., approach_height: _Optional[float] = ...) -> None: ...
+    class PlaceLid(_message.Message):
+        __slots__ = ("labware", "location", "motion_profile", "place_on_plate", "approach_height")
+        LABWARE_FIELD_NUMBER: _ClassVar[int]
+        LOCATION_FIELD_NUMBER: _ClassVar[int]
+        MOTION_PROFILE_FIELD_NUMBER: _ClassVar[int]
+        PLACE_ON_PLATE_FIELD_NUMBER: _ClassVar[int]
+        APPROACH_HEIGHT_FIELD_NUMBER: _ClassVar[int]
+        labware: str
+        location: str
+        motion_profile: str
+        place_on_plate: bool
+        approach_height: float
+        def __init__(self, labware: _Optional[str] = ..., location: _Optional[str] = ..., motion_profile: _Optional[str] = ..., place_on_plate: _Optional[bool] = ..., approach_height: _Optional[float] = ...) -> None: ...
+    class RetrievePlate(_message.Message):
+        __slots__ = ("labware", "location", "approach_height", "motion_profile")
+        LABWARE_FIELD_NUMBER: _ClassVar[int]
+        LOCATION_FIELD_NUMBER: _ClassVar[int]
+        APPROACH_HEIGHT_FIELD_NUMBER: _ClassVar[int]
+        MOTION_PROFILE_FIELD_NUMBER: _ClassVar[int]
+        labware: str
+        location: str
+        approach_height: float
+        motion_profile: str
+        def __init__(self, labware: _Optional[str] = ..., location: _Optional[str] = ..., approach_height: _Optional[float] = ..., motion_profile: _Optional[str] = ...) -> None: ...
+    class DropOffPlate(_message.Message):
+        __slots__ = ("labware", "location", "approach_height", "motion_profile")
+        LABWARE_FIELD_NUMBER: _ClassVar[int]
+        LOCATION_FIELD_NUMBER: _ClassVar[int]
+        APPROACH_HEIGHT_FIELD_NUMBER: _ClassVar[int]
+        MOTION_PROFILE_FIELD_NUMBER: _ClassVar[int]
+        labware: str
+        location: str
+        approach_height: float
+        motion_profile: str
+        def __init__(self, labware: _Optional[str] = ..., location: _Optional[str] = ..., approach_height: _Optional[float] = ..., motion_profile: _Optional[str] = ...) -> None: ...
+    class RunSequence(_message.Message):
+        __slots__ = ("sequence_name", "labware")
+        SEQUENCE_NAME_FIELD_NUMBER: _ClassVar[int]
+        LABWARE_FIELD_NUMBER: _ClassVar[int]
+        sequence_name: str
+        labware: str
+        def __init__(self, sequence_name: _Optional[str] = ..., labware: _Optional[str] = ...) -> None: ...
+    class Engage(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class Release(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class Unwind(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class Move(_message.Message):
+        __slots__ = ("location", "motion_profile", "approach_height")
+        LOCATION_FIELD_NUMBER: _ClassVar[int]
+        MOTION_PROFILE_FIELD_NUMBER: _ClassVar[int]
+        APPROACH_HEIGHT_FIELD_NUMBER: _ClassVar[int]
+        location: str
+        motion_profile: str
+        approach_height: int
+        def __init__(self, location: _Optional[str] = ..., motion_profile: _Optional[str] = ..., approach_height: _Optional[int] = ...) -> None: ...
+    class GraspPlate(_message.Message):
+        __slots__ = ("width", "speed", "force")
+        WIDTH_FIELD_NUMBER: _ClassVar[int]
+        SPEED_FIELD_NUMBER: _ClassVar[int]
+        FORCE_FIELD_NUMBER: _ClassVar[int]
+        width: int
+        speed: int
+        force: int
+        def __init__(self, width: _Optional[int] = ..., speed: _Optional[int] = ..., force: _Optional[int] = ...) -> None: ...
+    class ReleasePlate(_message.Message):
+        __slots__ = ("width", "speed")
+        WIDTH_FIELD_NUMBER: _ClassVar[int]
+        SPEED_FIELD_NUMBER: _ClassVar[int]
+        width: int
+        speed: int
+        def __init__(self, width: _Optional[int] = ..., speed: _Optional[int] = ...) -> None: ...
+    class Transfer(_message.Message):
+        __slots__ = ("source_nest", "destination_nest", "labware", "motion_profile")
+        SOURCE_NEST_FIELD_NUMBER: _ClassVar[int]
+        DESTINATION_NEST_FIELD_NUMBER: _ClassVar[int]
+        LABWARE_FIELD_NUMBER: _ClassVar[int]
+        MOTION_PROFILE_FIELD_NUMBER: _ClassVar[int]
+        source_nest: str
+        destination_nest: str
+        labware: str
+        motion_profile: str
+        def __init__(self, source_nest: _Optional[str] = ..., destination_nest: _Optional[str] = ..., labware: _Optional[str] = ..., motion_profile: _Optional[str] = ...) -> None: ...
+    class Wait(_message.Message):
+        __slots__ = ("duration",)
+        DURATION_FIELD_NUMBER: _ClassVar[int]
+        duration: int
+        def __init__(self, duration: _Optional[int] = ...) -> None: ...
+    class RegisterMotionProfile(_message.Message):
+        __slots__ = ("id", "speed", "speed2", "accel", "decel", "accel_ramp", "decel_ramp", "inrange", "straight")
+        ID_FIELD_NUMBER: _ClassVar[int]
+        SPEED_FIELD_NUMBER: _ClassVar[int]
+        SPEED2_FIELD_NUMBER: _ClassVar[int]
+        ACCEL_FIELD_NUMBER: _ClassVar[int]
+        DECEL_FIELD_NUMBER: _ClassVar[int]
+        ACCEL_RAMP_FIELD_NUMBER: _ClassVar[int]
+        DECEL_RAMP_FIELD_NUMBER: _ClassVar[int]
+        INRANGE_FIELD_NUMBER: _ClassVar[int]
+        STRAIGHT_FIELD_NUMBER: _ClassVar[int]
+        id: int
+        speed: float
+        speed2: float
+        accel: float
+        decel: float
+        accel_ramp: float
+        decel_ramp: float
+        inrange: float
+        straight: int
+        def __init__(self, id: _Optional[int] = ..., speed: _Optional[float] = ..., speed2: _Optional[float] = ..., accel: _Optional[float] = ..., decel: _Optional[float] = ..., accel_ramp: _Optional[float] = ..., decel_ramp: _Optional[float] = ..., inrange: _Optional[float] = ..., straight: _Optional[int] = ...) -> None: ...
+    class LoadWaypoints(_message.Message):
+        __slots__ = ("waypoints",)
+        WAYPOINTS_FIELD_NUMBER: _ClassVar[int]
+        waypoints: _struct_pb2.Struct
+        def __init__(self, waypoints: _Optional[_Union[_struct_pb2.Struct, _Mapping]] = ...) -> None: ...
+    class LoadLabware(_message.Message):
+        __slots__ = ("labwares",)
+        LABWARES_FIELD_NUMBER: _ClassVar[int]
+        labwares: _struct_pb2.Struct
+        def __init__(self, labwares: _Optional[_Union[_struct_pb2.Struct, _Mapping]] = ...) -> None: ...
+    MOVE_FIELD_NUMBER: _ClassVar[int]
+    GRASP_PLATE_FIELD_NUMBER: _ClassVar[int]
+    RELEASE_PLATE_FIELD_NUMBER: _ClassVar[int]
+    TRANSFER_FIELD_NUMBER: _ClassVar[int]
+    WAIT_FIELD_NUMBER: _ClassVar[int]
+    RELEASE_FIELD_NUMBER: _ClassVar[int]
+    ENGAGE_FIELD_NUMBER: _ClassVar[int]
+    UNWIND_FIELD_NUMBER: _ClassVar[int]
+    RUN_SEQUENCE_FIELD_NUMBER: _ClassVar[int]
+    RETRIEVE_PLATE_FIELD_NUMBER: _ClassVar[int]
+    DROPOFF_PLATE_FIELD_NUMBER: _ClassVar[int]
+    PICK_LID_FIELD_NUMBER: _ClassVar[int]
+    PLACE_LID_FIELD_NUMBER: _ClassVar[int]
+    GET_CURRENT_LOCATION_FIELD_NUMBER: _ClassVar[int]
+    JOG_FIELD_NUMBER: _ClassVar[int]
+    RAW_COMMAND_FIELD_NUMBER: _ClassVar[int]
+    REGISTER_MOTION_PROFILE_FIELD_NUMBER: _ClassVar[int]
+    LOAD_WAYPOINTS_FIELD_NUMBER: _ClassVar[int]
+    LOAD_LABWARE_FIELD_NUMBER: _ClassVar[int]
+    move: Command.Move
+    grasp_plate: Command.GraspPlate
+    release_plate: Command.ReleasePlate
+    transfer: Command.Transfer
+    wait: Command.Wait
+    release: Command.Release
+    engage: Command.Engage
+    unwind: Command.Unwind
+    run_sequence: Command.RunSequence
+    retrieve_plate: Command.RetrievePlate
+    dropoff_plate: Command.DropOffPlate
+    pick_lid: Command.PickLid
+    place_lid: Command.PlaceLid
+    get_current_location: Command.GetCurrentLocation
+    jog: Command.Jog
+    raw_command: Command.RawCommand
+    register_motion_profile: Command.RegisterMotionProfile
+    load_waypoints: Command.LoadWaypoints
+    load_labware: Command.LoadLabware
+    def __init__(self, move: _Optional[_Union[Command.Move, _Mapping]] = ..., grasp_plate: _Optional[_Union[Command.GraspPlate, _Mapping]] = ..., release_plate: _Optional[_Union[Command.ReleasePlate, _Mapping]] = ..., transfer: _Optional[_Union[Command.Transfer, _Mapping]] = ..., wait: _Optional[_Union[Command.Wait, _Mapping]] = ..., release: _Optional[_Union[Command.Release, _Mapping]] = ..., engage: _Optional[_Union[Command.Engage, _Mapping]] = ..., unwind: _Optional[_Union[Command.Unwind, _Mapping]] = ..., run_sequence: _Optional[_Union[Command.RunSequence, _Mapping]] = ..., retrieve_plate: _Optional[_Union[Command.RetrievePlate, _Mapping]] = ..., dropoff_plate: _Optional[_Union[Command.DropOffPlate, _Mapping]] = ..., pick_lid: _Optional[_Union[Command.PickLid, _Mapping]] = ..., place_lid: _Optional[_Union[Command.PlaceLid, _Mapping]] = ..., get_current_location: _Optional[_Union[Command.GetCurrentLocation, _Mapping]] = ..., jog: _Optional[_Union[Command.Jog, _Mapping]] = ..., raw_command: _Optional[_Union[Command.RawCommand, _Mapping]] = ..., register_motion_profile: _Optional[_Union[Command.RegisterMotionProfile, _Mapping]] = ..., load_waypoints: _Optional[_Union[Command.LoadWaypoints, _Mapping]] = ..., load_labware: _Optional[_Union[Command.LoadLabware, _Mapping]] = ...) -> None: ...
+
+class Config(_message.Message):
+    __slots__ = ("host", "port", "joints", "gpl_version")
+    HOST_FIELD_NUMBER: _ClassVar[int]
+    PORT_FIELD_NUMBER: _ClassVar[int]
+    JOINTS_FIELD_NUMBER: _ClassVar[int]
+    GPL_VERSION_FIELD_NUMBER: _ClassVar[int]
+    host: str
+    port: int
+    joints: int
+    gpl_version: str
+    def __init__(self, host: _Optional[str] = ..., port: _Optional[int] = ..., joints: _Optional[int] = ..., gpl_version: _Optional[str] = ...) -> None: ...

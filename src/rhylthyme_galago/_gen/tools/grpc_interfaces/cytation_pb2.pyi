@@ -1,0 +1,93 @@
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from collections.abc import Iterable as _Iterable, Mapping as _Mapping
+from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class Command(_message.Message):
+    __slots__ = ("open_carrier", "close_carrier", "start_read")
+    class OpenCarrier(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class CloseCarrier(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class StartRead(_message.Message):
+        __slots__ = ("protocol_file", "experiment_name", "well_addresses")
+        PROTOCOL_FILE_FIELD_NUMBER: _ClassVar[int]
+        EXPERIMENT_NAME_FIELD_NUMBER: _ClassVar[int]
+        WELL_ADDRESSES_FIELD_NUMBER: _ClassVar[int]
+        protocol_file: str
+        experiment_name: str
+        well_addresses: _containers.RepeatedScalarFieldContainer[str]
+        def __init__(self, protocol_file: _Optional[str] = ..., experiment_name: _Optional[str] = ..., well_addresses: _Optional[_Iterable[str]] = ...) -> None: ...
+    OPEN_CARRIER_FIELD_NUMBER: _ClassVar[int]
+    CLOSE_CARRIER_FIELD_NUMBER: _ClassVar[int]
+    START_READ_FIELD_NUMBER: _ClassVar[int]
+    open_carrier: Command.OpenCarrier
+    close_carrier: Command.CloseCarrier
+    start_read: Command.StartRead
+    def __init__(self, open_carrier: _Optional[_Union[Command.OpenCarrier, _Mapping]] = ..., close_carrier: _Optional[_Union[Command.CloseCarrier, _Mapping]] = ..., start_read: _Optional[_Union[Command.StartRead, _Mapping]] = ...) -> None: ...
+
+class Config(_message.Message):
+    __slots__ = ("protocol_dir", "experiment_dir", "reader_type")
+    class CytationReaderType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        CYTATION_UNKNOWN: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_ELX800: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_ELX808: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY_HT: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_FLX800: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_POWERWAVE: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY2: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_POWERWAVEXS2: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY_MX: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_EPOCH: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY_H4: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY_H1: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_EON: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY_NEO: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_CYTATION3: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY_HTX: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_CYTATION5: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_EPOCH2: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY_NEO2: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_LIONHEART_FX: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_800TS: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_CYTATION1: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_SYNERGY_LX: _ClassVar[Config.CytationReaderType]
+        CYTATION_READER_LIONHEART_LX: _ClassVar[Config.CytationReaderType]
+    CYTATION_UNKNOWN: Config.CytationReaderType
+    CYTATION_READER_ELX800: Config.CytationReaderType
+    CYTATION_READER_ELX808: Config.CytationReaderType
+    CYTATION_READER_SYNERGY_HT: Config.CytationReaderType
+    CYTATION_READER_FLX800: Config.CytationReaderType
+    CYTATION_READER_POWERWAVE: Config.CytationReaderType
+    CYTATION_READER_SYNERGY2: Config.CytationReaderType
+    CYTATION_READER_POWERWAVEXS2: Config.CytationReaderType
+    CYTATION_READER_SYNERGY_MX: Config.CytationReaderType
+    CYTATION_READER_EPOCH: Config.CytationReaderType
+    CYTATION_READER_SYNERGY_H4: Config.CytationReaderType
+    CYTATION_READER_SYNERGY_H1: Config.CytationReaderType
+    CYTATION_READER_EON: Config.CytationReaderType
+    CYTATION_READER_SYNERGY_NEO: Config.CytationReaderType
+    CYTATION_READER_CYTATION3: Config.CytationReaderType
+    CYTATION_READER_SYNERGY_HTX: Config.CytationReaderType
+    CYTATION_READER_CYTATION5: Config.CytationReaderType
+    CYTATION_READER_EPOCH2: Config.CytationReaderType
+    CYTATION_READER_SYNERGY_NEO2: Config.CytationReaderType
+    CYTATION_READER_LIONHEART_FX: Config.CytationReaderType
+    CYTATION_READER_800TS: Config.CytationReaderType
+    CYTATION_READER_CYTATION1: Config.CytationReaderType
+    CYTATION_READER_SYNERGY_LX: Config.CytationReaderType
+    CYTATION_READER_LIONHEART_LX: Config.CytationReaderType
+    PROTOCOL_DIR_FIELD_NUMBER: _ClassVar[int]
+    EXPERIMENT_DIR_FIELD_NUMBER: _ClassVar[int]
+    READER_TYPE_FIELD_NUMBER: _ClassVar[int]
+    protocol_dir: str
+    experiment_dir: str
+    reader_type: Config.CytationReaderType
+    def __init__(self, protocol_dir: _Optional[str] = ..., experiment_dir: _Optional[str] = ..., reader_type: _Optional[_Union[Config.CytationReaderType, str]] = ...) -> None: ...

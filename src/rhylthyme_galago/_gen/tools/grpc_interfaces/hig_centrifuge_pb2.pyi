@@ -1,0 +1,57 @@
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from collections.abc import Mapping as _Mapping
+from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class Command(_message.Message):
+    __slots__ = ("home", "close_shield", "open_shield", "spin", "home_shield")
+    class Home(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class CloseShield(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class OpenShield(_message.Message):
+        __slots__ = ("bucket_id",)
+        BUCKET_ID_FIELD_NUMBER: _ClassVar[int]
+        bucket_id: int
+        def __init__(self, bucket_id: _Optional[int] = ...) -> None: ...
+    class Spin(_message.Message):
+        __slots__ = ("speed", "acceleration", "decceleration", "duration")
+        SPEED_FIELD_NUMBER: _ClassVar[int]
+        ACCELERATION_FIELD_NUMBER: _ClassVar[int]
+        DECCELERATION_FIELD_NUMBER: _ClassVar[int]
+        DURATION_FIELD_NUMBER: _ClassVar[int]
+        speed: int
+        acceleration: int
+        decceleration: int
+        duration: int
+        def __init__(self, speed: _Optional[int] = ..., acceleration: _Optional[int] = ..., decceleration: _Optional[int] = ..., duration: _Optional[int] = ...) -> None: ...
+    class AbortSpin(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class Reset(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class HomeShield(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    HOME_FIELD_NUMBER: _ClassVar[int]
+    CLOSE_SHIELD_FIELD_NUMBER: _ClassVar[int]
+    OPEN_SHIELD_FIELD_NUMBER: _ClassVar[int]
+    SPIN_FIELD_NUMBER: _ClassVar[int]
+    HOME_SHIELD_FIELD_NUMBER: _ClassVar[int]
+    home: Command.Home
+    close_shield: Command.CloseShield
+    open_shield: Command.OpenShield
+    spin: Command.Spin
+    home_shield: Command.HomeShield
+    def __init__(self, home: _Optional[_Union[Command.Home, _Mapping]] = ..., close_shield: _Optional[_Union[Command.CloseShield, _Mapping]] = ..., open_shield: _Optional[_Union[Command.OpenShield, _Mapping]] = ..., spin: _Optional[_Union[Command.Spin, _Mapping]] = ..., home_shield: _Optional[_Union[Command.HomeShield, _Mapping]] = ...) -> None: ...
+
+class Config(_message.Message):
+    __slots__ = ("can_port",)
+    CAN_PORT_FIELD_NUMBER: _ClassVar[int]
+    can_port: int
+    def __init__(self, can_port: _Optional[int] = ...) -> None: ...

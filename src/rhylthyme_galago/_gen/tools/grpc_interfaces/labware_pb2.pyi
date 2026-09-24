@@ -1,0 +1,35 @@
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from typing import ClassVar as _ClassVar, Optional as _Optional
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class Labware(_message.Message):
+    __slots__ = ("id", "name", "image_url", "description", "number_of_rows", "number_of_columns", "z_offset", "width", "height", "plate_lid_offset", "lid_offset", "stack_height", "has_lid")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    IMAGE_URL_FIELD_NUMBER: _ClassVar[int]
+    DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
+    NUMBER_OF_ROWS_FIELD_NUMBER: _ClassVar[int]
+    NUMBER_OF_COLUMNS_FIELD_NUMBER: _ClassVar[int]
+    Z_OFFSET_FIELD_NUMBER: _ClassVar[int]
+    WIDTH_FIELD_NUMBER: _ClassVar[int]
+    HEIGHT_FIELD_NUMBER: _ClassVar[int]
+    PLATE_LID_OFFSET_FIELD_NUMBER: _ClassVar[int]
+    LID_OFFSET_FIELD_NUMBER: _ClassVar[int]
+    STACK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
+    HAS_LID_FIELD_NUMBER: _ClassVar[int]
+    id: int
+    name: str
+    image_url: str
+    description: str
+    number_of_rows: int
+    number_of_columns: int
+    z_offset: float
+    width: float
+    height: float
+    plate_lid_offset: float
+    lid_offset: float
+    stack_height: float
+    has_lid: bool
+    def __init__(self, id: _Optional[int] = ..., name: _Optional[str] = ..., image_url: _Optional[str] = ..., description: _Optional[str] = ..., number_of_rows: _Optional[int] = ..., number_of_columns: _Optional[int] = ..., z_offset: _Optional[float] = ..., width: _Optional[float] = ..., height: _Optional[float] = ..., plate_lid_offset: _Optional[float] = ..., lid_offset: _Optional[float] = ..., stack_height: _Optional[float] = ..., has_lid: _Optional[bool] = ...) -> None: ...

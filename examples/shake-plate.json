@@ -1,0 +1,40 @@
+{
+  "programId": "galago-shake-plate",
+  "name": "Shake a plate on a galago Bioshake",
+  "description": "Smallest instrument program: load a plate by hand, shake it on the workcell's 'shaker', then take it off. The shake step ends when the Bioshake reports it has finished.",
+  "version": "1.0.0",
+  "environmentType": "laboratory",
+  "startTrigger": { "type": "manual" },
+  "tracks": [
+    {
+      "trackId": "bench",
+      "name": "Bench",
+      "steps": [
+        {
+          "stepId": "load-plate",
+          "name": "Load plate onto the shaker",
+          "duration": { "type": "fixed", "seconds": 3 },
+          "startTrigger": { "type": "programStart" }
+        },
+        {
+          "stepId": "shake",
+          "name": "Shake at 1000 rpm",
+          "instrument": {
+            "tool": "shaker",
+            "toolType": "bioshake",
+            "command": "start_shake",
+            "params": { "speed": 1000, "acceleration": 5, "duration": 5 }
+          },
+          "startTrigger": { "type": "afterStep", "stepId": "load-plate" }
+        },
+        {
+          "stepId": "unload-plate",
+          "name": "Take the plate off",
+          "duration": { "type": "fixed", "seconds": 3 },
+          "startTrigger": { "type": "afterStep", "stepId": "shake" }
+        }
+      ]
+    }
+  ],
+  "resourceConstraints": []
+}

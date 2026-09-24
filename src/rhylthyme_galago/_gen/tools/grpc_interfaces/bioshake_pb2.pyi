@@ -1,0 +1,76 @@
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from collections.abc import Mapping as _Mapping
+from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class Command(_message.Message):
+    __slots__ = ("grip", "ungrip", "home", "start_shake", "stop_shake", "reset", "wait_for_shake_to_finish", "set_temperature", "temperature_on", "temperature_off")
+    class Grip(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class Ungrip(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class Home(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class StartShake(_message.Message):
+        __slots__ = ("speed", "acceleration", "duration")
+        SPEED_FIELD_NUMBER: _ClassVar[int]
+        ACCELERATION_FIELD_NUMBER: _ClassVar[int]
+        DURATION_FIELD_NUMBER: _ClassVar[int]
+        speed: int
+        acceleration: int
+        duration: int
+        def __init__(self, speed: _Optional[int] = ..., acceleration: _Optional[int] = ..., duration: _Optional[int] = ...) -> None: ...
+    class StopShake(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class Reset(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class WaitForShakeToFinish(_message.Message):
+        __slots__ = ("timeout",)
+        TIMEOUT_FIELD_NUMBER: _ClassVar[int]
+        timeout: int
+        def __init__(self, timeout: _Optional[int] = ...) -> None: ...
+    class TemperatureOn(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class TemperatureOff(_message.Message):
+        __slots__ = ()
+        def __init__(self) -> None: ...
+    class SetTemperature(_message.Message):
+        __slots__ = ("temperature",)
+        TEMPERATURE_FIELD_NUMBER: _ClassVar[int]
+        temperature: int
+        def __init__(self, temperature: _Optional[int] = ...) -> None: ...
+    GRIP_FIELD_NUMBER: _ClassVar[int]
+    UNGRIP_FIELD_NUMBER: _ClassVar[int]
+    HOME_FIELD_NUMBER: _ClassVar[int]
+    START_SHAKE_FIELD_NUMBER: _ClassVar[int]
+    STOP_SHAKE_FIELD_NUMBER: _ClassVar[int]
+    RESET_FIELD_NUMBER: _ClassVar[int]
+    WAIT_FOR_SHAKE_TO_FINISH_FIELD_NUMBER: _ClassVar[int]
+    SET_TEMPERATURE_FIELD_NUMBER: _ClassVar[int]
+    TEMPERATURE_ON_FIELD_NUMBER: _ClassVar[int]
+    TEMPERATURE_OFF_FIELD_NUMBER: _ClassVar[int]
+    grip: Command.Grip
+    ungrip: Command.Ungrip
+    home: Command.Home
+    start_shake: Command.StartShake
+    stop_shake: Command.StopShake
+    reset: Command.Reset
+    wait_for_shake_to_finish: Command.WaitForShakeToFinish
+    set_temperature: Command.SetTemperature
+    temperature_on: Command.TemperatureOn
+    temperature_off: Command.TemperatureOff
+    def __init__(self, grip: _Optional[_Union[Command.Grip, _Mapping]] = ..., ungrip: _Optional[_Union[Command.Ungrip, _Mapping]] = ..., home: _Optional[_Union[Command.Home, _Mapping]] = ..., start_shake: _Optional[_Union[Command.StartShake, _Mapping]] = ..., stop_shake: _Optional[_Union[Command.StopShake, _Mapping]] = ..., reset: _Optional[_Union[Command.Reset, _Mapping]] = ..., wait_for_shake_to_finish: _Optional[_Union[Command.WaitForShakeToFinish, _Mapping]] = ..., set_temperature: _Optional[_Union[Command.SetTemperature, _Mapping]] = ..., temperature_on: _Optional[_Union[Command.TemperatureOn, _Mapping]] = ..., temperature_off: _Optional[_Union[Command.TemperatureOff, _Mapping]] = ...) -> None: ...
+
+class Config(_message.Message):
+    __slots__ = ("com_port",)
+    COM_PORT_FIELD_NUMBER: _ClassVar[int]
+    com_port: str
+    def __init__(self, com_port: _Optional[str] = ...) -> None: ...
