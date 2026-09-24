@@ -49,3 +49,19 @@ def test_build_config_carries_simulated_and_tool_config():
 def test_build_config_rejects_unknown_config_field():
     with pytest.raises(CommandError, match="bioshake config"):
         build_config("bioshake", {"baud": 9600}, simulated=False)
+
+
+def test_exported_catalog_is_fresh():
+    """catalog/ is what the MCP server vendors; regenerate it with
+    `python scripts/export_catalog.py catalog` after changing the protos or
+    validate_command's messages."""
+    import importlib.util
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    spec = importlib.util.spec_from_file_location("export_catalog", root / "scripts" / "export_catalog.py")
+    export = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(export)
+    assert json.loads((root / "catalog" / "galago-commands.json").read_text()) == export.catalog()
+    assert json.loads((root / "catalog" / "galago-command-cases.json").read_text()) == export.cases()

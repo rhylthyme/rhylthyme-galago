@@ -62,7 +62,7 @@ def test_every_problem_is_reported():
 def test_repeated_fields():
     assert validate_command("cytation", "start_read", {"well_addresses": ["A1", "B2"]}) == []
     [problem] = validate_command("cytation", "start_read", {"well_addresses": "A1"})
-    assert "'well_addresses' must be a list of a string" in problem
+    assert problem == "param 'well_addresses' must be a list, got 'A1'"
 
 
 def program(*instruments):

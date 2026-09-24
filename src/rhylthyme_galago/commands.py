@@ -122,7 +122,7 @@ def _check_message(
             continue
         items = value if _is_repeated(field) else [value]
         if _is_repeated(field) and not isinstance(value, list):
-            problems.append(f"param '{where}' must be a list of {_type_name(field)}")
+            problems.append(f"param '{where}' must be a list, got {value!r}")
             continue
         for item in items:
             if field.type == FieldDescriptor.TYPE_MESSAGE:
