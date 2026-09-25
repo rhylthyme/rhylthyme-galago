@@ -1,6 +1,6 @@
 # Design note: the web live-view bridge (plan phase 10)
 
-Status: **draft, for approval.** No code is written until this is approved.
+Status: **approved 2026-09-25** (decisions recorded at the end).
 Plan: [issue #1](https://github.com/rhylthyme/rhylthyme-galago/issues/1), phase 10.
 
 ## Goal
@@ -130,14 +130,12 @@ Sharing a bridge with other lab members (owner-only in v1; a
 instrument commands, bridge auto-update, and mobile push notifications on
 failure.
 
-## Decisions needed
+## Decisions (2026-09-25)
 
-1. **Transport**: Supabase tables + RLS + Realtime subscriptions, bridge polling
-   commands (recommended above) vs. Supabase Realtime *private* channels with
-   RLS on `realtime.messages` for commands too (lower latency, new Python
-   dependency, harder to audit).
-2. **Who may use it in v1**: owner-only (recommended) or lab members too.
-3. **Live from the web at all**: behind `--allow-live` + typed confirmation
-   (recommended), or never (web runs always simulated).
-4. **Where the bridge lives**: in rhylthyme-galago (recommended: only instrument
-   labs need it) or in rhylthyme-cli-runner.
+1. **Transport**: Supabase tables + owner-only RLS; the browser follows
+   `bridge_state` / `bridges` through Realtime row changes; the bridge polls
+   `bridge_commands` every second.
+2. **Access**: owner only in v1.
+3. **Live from the web**: two keys, `--allow-live` on the bridge and a typed
+   `live` in the browser after the pre-flight summary.
+4. **Package**: `rhylthyme bridge` ships in rhylthyme-galago.
