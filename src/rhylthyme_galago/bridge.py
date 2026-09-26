@@ -1,4 +1,4 @@
-"""Publish a live instrument run to rhylthyme.com (the web bridge, slice 1).
+"""Publish a live instrument run to rhylthyme.com and take commands from it.
 
 ``rhylthyme bridge --workcell lab.json PROGRAM`` runs a program exactly like
 ``rhylthyme run`` and, while it runs, keeps two rows up to date in the user's
@@ -9,6 +9,10 @@ and docs/design/web-bridge.md):
   heartbeat;
 - ``bridge_state``: the run's steps, their status, the tool each waits on and
   any failure.
+
+With a ``submit`` callback it also reads the user's ``bridge_commands`` rows
+(pause, resume, retry, skip, abort), refuses stale, foreign or unknown ones,
+lets the runner decide the rest, and writes each outcome back to its row.
 
 Only outbound HTTPS, with the user's session. Nothing about where a tool
 listens ever leaves the machine: rows are built from an allowlist of fields,
@@ -32,6 +36,18 @@ TokenFn = Callable[[], str]
 
 HEARTBEAT_SECONDS = 10.0
 STATE_SECONDS = 1.0
+
+#: Commands the browser may send (design note: "The command set"). start_run
+#: arrives with slice 3; until then it is refused like anything unknown.
+STEER_KINDS = ("pause", "resume", "retry", "skip", "abort")
+
+#: A command older than this when the bridge sees it is refused, so a
+#: reconnecting bridge never replays a stale retry or abort.
+COMMAND_MAX_AGE_SECONDS = 30.0
+
+#: Called with {"id", "kind", "args"}; returns {"accepted", "reason"} once the
+#: runner has decided, or None if it did not answer in time.
+Submit = Callable[[Dict[str, Any]], Optional[Dict[str, Any]]]
 
 
 class BridgeError(RuntimeError):
@@ -154,6 +170,9 @@ class SupabaseRest:
         self.token = token
         self.timeout = timeout
 
+    def select(self, table: str, query: str) -> List[Dict[str, Any]]:
+        return self._request("GET", f"/{table}?{query}", None, {}) or []
+
     def upsert(self, table: str, row: Mapping[str, Any], on_conflict: str) -> None:
         self._request(
             "POST",
@@ -165,19 +184,19 @@ class SupabaseRest:
     def patch(self, table: str, match: str, row: Mapping[str, Any]) -> None:
         self._request("PATCH", f"/{table}?{match}", row, {"Prefer": "return=minimal"})
 
-    def _request(self, method: str, path: str, body: Any, extra: Dict[str, str]) -> None:
+    def _request(self, method: str, path: str, body: Any, extra: Dict[str, str]) -> Any:
         headers = {
             "apikey": self.anon_key,
             "Authorization": f"Bearer {self.token()}",
             "Content-Type": "application/json",
             **extra,
         }
-        req = urllib.request.Request(
-            self.url + path, data=json.dumps(body).encode(), headers=headers, method=method
-        )
+        data = None if body is None else json.dumps(body).encode()
+        req = urllib.request.Request(self.url + path, data=data, headers=headers, method=method)
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                resp.read()
+                raw = resp.read()
+                return json.loads(raw) if raw else None
         except urllib.error.HTTPError as e:
             detail = e.read().decode("utf-8", "replace")[:300]
             raise BridgeError(f"{method} {path.split('?')[0]}: HTTP {e.code} {detail}") from e
@@ -202,6 +221,8 @@ class Publisher:
         allows_live: bool,
         version: str,
         on_error: Optional[Callable[[str], None]] = None,
+        submit: Optional[Submit] = None,
+        clock: Callable[[], float] = time.time,
     ):
         self.runner = runner
         self.rest = rest
@@ -216,6 +237,9 @@ class Publisher:
         self.scrub = scrubber(workcell)
         self.run_id = str(uuid.uuid4())
         self.on_error = on_error or (lambda message: None)
+        self.submit = submit  # None: watch only, commands are not read
+        self.clock = clock
+        self._handled: set = set()
         self.last_error: Optional[str] = None
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
@@ -258,6 +282,50 @@ class Publisher:
             self.rest.upsert("bridge_state", row, "bridge_id")
             self._last_state = key
 
+    def poll_commands(self) -> None:
+        """Handle pending browser commands, oldest first, once each."""
+        if self.submit is None:
+            return
+        pending = self.rest.select(
+            "bridge_commands",
+            f"bridge_id=eq.{self.bridge_id}&status=eq.pending&order=created_at.asc&select=*",
+        )
+        for command in pending:
+            command_id = str(command.get("id"))
+            if command_id in self._handled:
+                continue
+            self._handled.add(command_id)
+            outcome = self._decide(command)
+            self.rest.patch(
+                "bridge_commands",
+                f"id=eq.{command_id}&status=eq.pending",
+                {
+                    "status": "done" if outcome["accepted"] else "rejected",
+                    "result": outcome,
+                    "updated_at": _now_iso(),
+                },
+            )
+
+    def _decide(self, command: Mapping[str, Any]) -> Dict[str, Any]:
+        def no(reason: str) -> Dict[str, Any]:
+            return {"accepted": False, "reason": reason}
+
+        if command.get("user_id") != self.user_id:
+            return no("not your bridge")
+        age = self.clock() - _parse_iso(command.get("created_at"))
+        if age > COMMAND_MAX_AGE_SECONDS:
+            return no(f"expired ({int(age)} s old)")
+        kind = command.get("kind")
+        if kind == "start_run":
+            return no("starting runs from the web is not available yet")
+        if kind not in STEER_KINDS:
+            return no(f"unknown command {kind!r}")
+        args = command.get("args") if isinstance(command.get("args"), dict) else {}
+        outcome = self.submit({"id": str(command.get("id")), "kind": kind, "args": args})
+        if outcome is None:
+            return no("the runner did not answer")
+        return {"accepted": bool(outcome.get("accepted")), "reason": outcome.get("reason") or ""}
+
     def start(self) -> "Publisher":
         self.publish_once(force=True)  # fail fast: bad session, missing tables
         self._thread = threading.Thread(target=self._loop, name="rhylthyme-bridge", daemon=True)
@@ -267,6 +335,7 @@ class Publisher:
     def _loop(self) -> None:
         while not self._stop.wait(STATE_SECONDS):
             try:
+                self.poll_commands()
                 self.publish_once()
                 self.last_error = None
             except Exception as e:  # noqa: BLE001 - keep running; report once
@@ -290,8 +359,24 @@ def _now_iso() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
 
+def _parse_iso(value: Any) -> float:
+    """Seconds since the epoch for a Postgres/ISO timestamp (UTC if no zone)."""
+    from datetime import datetime, timezone
+
+    text = str(value or "").replace("Z", "+00:00")
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return 0.0  # unparseable: treat as ancient, so it expires
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
+
+
 __all__ = [
     "BridgeError",
+    "COMMAND_MAX_AGE_SECONDS",
+    "STEER_KINDS",
     "Publisher",
     "SupabaseRest",
     "bridge_id_for",
