@@ -37,9 +37,10 @@ TokenFn = Callable[[], str]
 HEARTBEAT_SECONDS = 10.0
 STATE_SECONDS = 1.0
 
-#: Commands the browser may send (design note: "The command set"). start_run
-#: arrives with slice 3; until then it is refused like anything unknown.
+#: Commands the browser may send (design note: "The command set"): steering a
+#: run in progress, and starting one on an idle bridge.
 STEER_KINDS = ("pause", "resume", "retry", "skip", "abort")
+START_KINDS = ("start_run",)
 
 #: A command older than this when the bridge sees it is refused, so a
 #: reconnecting bridge never replays a stale retry or abort.
@@ -205,7 +206,12 @@ class SupabaseRest:
 
 
 class Publisher:
-    """Keeps ``bridges`` and ``bridge_state`` current on a background thread."""
+    """Keeps ``bridges`` and ``bridge_state`` current on a background thread.
+
+    With a ``runner`` it publishes that run and passes steering commands to
+    ``submit``. With ``runner=None`` the bridge is idle: it keeps its heartbeat,
+    leaves the last run's state as it was, and passes ``start_run`` on.
+    """
 
     def __init__(
         self,
@@ -216,13 +222,14 @@ class Publisher:
         user_id: str,
         workcell: Workcell,
         tools: List[Dict[str, str]],
-        program: Mapping[str, Any],
-        mode: str,
+        program: Optional[Mapping[str, Any]] = None,
+        mode: str = "simulated",
         allows_live: bool,
         version: str,
         on_error: Optional[Callable[[str], None]] = None,
         submit: Optional[Submit] = None,
         clock: Callable[[], float] = time.time,
+        program_id: Optional[str] = None,
     ):
         self.runner = runner
         self.rest = rest
@@ -230,8 +237,10 @@ class Publisher:
         self.user_id = user_id
         self.workcell = workcell
         self.tools = tools
-        self.program = program
+        self.program = program or {}
+        self.program_id = program_id
         self.mode = mode
+        self.accepts = STEER_KINDS if runner is not None else START_KINDS
         self.allows_live = allows_live
         self.version = version
         self.scrub = scrubber(workcell)
@@ -257,13 +266,16 @@ class Publisher:
             "last_seen": _now_iso(),
         }
 
-    def state_row(self) -> Dict[str, Any]:
+    def state_row(self) -> Optional[Dict[str, Any]]:
+        if self.runner is None:
+            return None  # idle: the last run's state stays as it was
         state = snapshot(self.runner, self.scrub)
         state["program"] = self.program
         return {
             "bridge_id": self.bridge_id,
             "user_id": self.user_id,
             "run_id": self.run_id,
+            "program_id": self.program_id,
             "program_name": self.program.get("name"),
             "mode": self.mode,
             "status": run_status(self.runner),
@@ -277,6 +289,8 @@ class Publisher:
             self.rest.upsert("bridges", self.bridge_row(), "id")
             self._last_heartbeat = now
         row = self.state_row()
+        if row is None:
+            return
         key = json.dumps({k: v for k, v in row.items() if k != "updated_at"}, sort_keys=True)
         if force or key != self._last_state:
             self.rest.upsert("bridge_state", row, "bridge_id")
@@ -316,10 +330,12 @@ class Publisher:
         if age > COMMAND_MAX_AGE_SECONDS:
             return no(f"expired ({int(age)} s old)")
         kind = command.get("kind")
-        if kind == "start_run":
-            return no("starting runs from the web is not available yet")
-        if kind not in STEER_KINDS:
+        if kind not in STEER_KINDS + START_KINDS:
             return no(f"unknown command {kind!r}")
+        if kind not in self.accepts:
+            if kind in START_KINDS:
+                return no("a run is already in progress")
+            return no("no run in progress")
         args = command.get("args") if isinstance(command.get("args"), dict) else {}
         outcome = self.submit({"id": str(command.get("id")), "kind": kind, "args": args})
         if outcome is None:
@@ -376,6 +392,7 @@ def _parse_iso(value: Any) -> float:
 __all__ = [
     "BridgeError",
     "COMMAND_MAX_AGE_SECONDS",
+    "START_KINDS",
     "STEER_KINDS",
     "Publisher",
     "SupabaseRest",

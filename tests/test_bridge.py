@@ -255,7 +255,7 @@ def test_commands_are_passed_to_the_runner_and_answered(fake):
     assert "bridge_id=eq.b-1" in get["path"] and "status=eq.pending" in get["path"]
 
 
-def test_stale_foreign_unknown_and_start_run_are_refused_without_the_runner(fake):
+def test_stale_foreign_unknown_and_start_run_during_a_run_are_refused(fake):
     fake.pending = [
         command("old", "pause", age=31),
         command("theirs", "pause", user="someone-else"),
@@ -268,7 +268,7 @@ def test_stale_foreign_unknown_and_start_run_are_refused_without_the_runner(fake
     reasons = {path.split("id=eq.")[1].split("&")[0]: body["result"]["reason"] for path, body in patches(fake)}
     assert reasons["old"].startswith("expired (31 s old)")
     assert reasons["theirs"] == "not your bridge"
-    assert reasons["start"] == "starting runs from the web is not available yet"
+    assert reasons["start"] == "a run is already in progress"
     assert reasons["weird"] == "unknown command 'reboot'"
     assert all(body["status"] == "rejected" for _, body in patches(fake))
 
@@ -294,3 +294,27 @@ def test_watch_only_publishers_never_read_commands(fake):
     p = publisher(fake, runner(step("a")))
     p.poll_commands()
     assert fake.requests == []
+
+
+def test_an_idle_bridge_takes_start_run_only(fake):
+    fake.pending = [command("s1", "start_run", program_id="p-1", mode="simulated"), command("p1", "pause")]
+    seen = []
+    p = publisher(fake, None, submit=lambda cmd: seen.append(cmd) or {"accepted": True, "reason": ""},
+                  clock=lambda: NOW)
+    p.poll_commands()
+    assert [c["kind"] for c in seen] == ["start_run"]
+    assert seen[0]["args"] == {"program_id": "p-1", "mode": "simulated"}
+    reasons = {path.split("id=eq.")[1].split("&")[0]: body["result"]["reason"] for path, body in patches(fake)}
+    assert reasons["p1"] == "no run in progress"
+
+
+def test_an_idle_bridge_keeps_its_heartbeat_but_not_the_state(fake):
+    p = publisher(fake, None)
+    p.publish_once(force=True)
+    assert [r["path"].split("?")[0] for r in fake.requests] == ["/rest/v1/bridges"]
+
+
+def test_the_state_row_names_the_saved_program(fake):
+    p = publisher(fake, runner(step("a")), program_id="p-1")
+    p.publish_once(force=True)
+    assert fake.requests[-1]["body"]["program_id"] == "p-1"
