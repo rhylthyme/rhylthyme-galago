@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rhylthyme-galago"
-version = "0.1.0a1"
+version = "0.2.0a0"
 description = "Drive galago-tools lab instruments from Rhylthyme programs"
 readme = "README.md"
 license = "Apache-2.0"

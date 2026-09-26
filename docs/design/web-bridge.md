@@ -1,6 +1,6 @@
 # Design note: the web live-view bridge (plan phase 10)
 
-Status: **approved 2026-09-25** (decisions recorded at the end).
+Status: **approved 2026-09-25**; all four slices shipped 2026-09-26 (see "As built" at the end).
 Plan: [issue #1](https://github.com/rhylthyme/rhylthyme-galago/issues/1), phase 10.
 
 ## Goal
@@ -109,7 +109,7 @@ through):
 | Threat | Mitigation |
 |---|---|
 | Someone else controls my lab | RLS owner-only on all three tables; bridge also checks `user_id` of each command matches its own session |
-| Stolen browser session | can at most start *simulated* runs unless the bridge allows live, and live also needs the typed confirmation; the lab can run `--read-only` (watch only) |
+| Stolen browser session | can at most start *simulated* runs unless the bridge allows live, and live also needs the typed confirmation |
 | Remote code execution | no `codeBlock` programs, no free-form commands |
 | Replayed / delayed commands | 30 s expiry, idempotent ids |
 | Leaking the lab network | address fields never serialised; tested |
@@ -139,3 +139,18 @@ failure.
 3. **Live from the web**: two keys, `--allow-live` on the bridge and a typed
    `live` in the browser after the pre-flight summary.
 4. **Package**: `rhylthyme bridge` ships in rhylthyme-galago.
+
+## As built (2026-09-26)
+
+- `rhylthyme bridge` ships in rhylthyme-cli-runner (the `rhylthyme` CLI, with
+  the `[galago]` extra); the publisher, REST client and scrubber live in
+  `rhylthyme_galago.bridge`.
+- `rhylthyme bridge PROGRAM --workcell W` runs one program and publishes it
+  (slices 1-2); `rhylthyme bridge --workcell W [--allow-live]` waits for
+  `start_run` commands (slices 3-4) and returns to waiting after each run.
+- Every web start configures its tools before it is accepted, in both modes;
+  a tool that is not ready is a `rejected` command whose reason is the
+  pre-flight report with addresses replaced by `<config>`.
+- Not built: a `--read-only` mode and the per-user command rate limit. Owner-only
+  RLS, the 30 s expiry and once-per-id handling are in place.
+- Migration: `rhylthyme-server/sql/galago_bridges.sql`.

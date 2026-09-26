@@ -45,9 +45,8 @@ listens, and stays on the lab machine:
 }
 ```
 
-Status: alpha ([plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1); the
-web live-view bridge is still to come). Tools run in galago's simulated mode
-unless you pass `--live`.
+Status: alpha ([plan](https://github.com/rhylthyme/rhylthyme-galago/issues/1)).
+Tools run in galago's simulated mode unless you pass `--live`.
 
 ## Quick start (simulated, no hardware)
 
@@ -136,6 +135,35 @@ answering; without a terminal and without that flag, a live run is refused.
 Workcell files stay on the lab machine: `rhylthyme publish` and `rhylthyme
 analyze` refuse them, programs name tools only by role, and run records hold no
 tool addresses.
+
+## From a browser: `rhylthyme bridge`
+
+```bash
+rhylthyme login
+rhylthyme bridge --workcell lab.json            # wait for runs started on the web
+rhylthyme bridge run.json --workcell lab.json   # or run one program and publish it
+```
+
+The bridge lists the lab machine on the **Bridges** page of
+[rhylthyme.com](https://rhylthyme.com/bridges), for your account only. From there
+you can watch a run's timeline live, pause and resume it, answer a failed
+instrument step (retry, skip or abort), and start any program saved in your
+library on that workcell. The terminal shows the same runner UI, plus every
+command that came from the web; Ctrl-C at the lab machine always wins.
+
+- **Outbound only.** The bridge opens no port and needs no tunnel; it makes
+  HTTPS calls to rhylthyme.com with your own login.
+- **Nothing about the lab network leaves it.** Tools are published by name,
+  type and status only; addresses, ports and configs never are, including in
+  error messages.
+- **The lab machine decides.** It rejects commands older than 30 seconds,
+  acts on each command once, refuses programs with code blocks or that do not
+  validate on its workcell, and configures the tools before accepting a start
+  (a tool that is not ready is a refusal the browser sees).
+- **Live from the web needs two keys.** Start the bridge with `--allow-live`;
+  the browser then shows the tools and every instrument command in the program
+  and asks you to type `live`. Without `--allow-live`, web starts are simulated
+  only.
 
 ## Tools are resources
 
