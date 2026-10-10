@@ -106,8 +106,8 @@ def test_simulated_bioshake_replies(bioshake_server):
 
 
 def test_example_program_runs_to_completion(bioshake_server, tmp_path):
-    runner_mod = pytest.importorskip("rhylthyme_cli_runner.program_runner")
-    from rhylthyme_cli_runner.instruments import attach_instruments
+    runner_mod = pytest.importorskip("rhylthyme.program_runner")
+    from rhylthyme.instruments import attach_instruments
 
     workcell = json.loads((EXAMPLES / "workcell-simulated.json").read_text())
     workcell["tools"][0]["port"] = bioshake_server
@@ -210,9 +210,9 @@ def test_fill_durations_asks_the_real_tool(bioshake_server):
 
 def test_passage_check_runs_on_three_simulated_tools(tmp_path):
     """The README's worked example: liconic + bioshake + cytation, people in between."""
-    runner_mod = pytest.importorskip("rhylthyme_cli_runner.program_runner")
-    from rhylthyme_cli_runner.history.recorder import RunRecorder
-    from rhylthyme_cli_runner.instruments import attach_instruments
+    runner_mod = pytest.importorskip("rhylthyme.program_runner")
+    from rhylthyme.history.recorder import RunRecorder
+    from rhylthyme.instruments import attach_instruments
 
     workcell = json.loads((EXAMPLES / "workcell-cell-culture.json").read_text())
     program = json.loads((EXAMPLES / "passage-check.json").read_text())

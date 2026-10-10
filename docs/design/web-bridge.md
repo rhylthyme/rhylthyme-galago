@@ -142,7 +142,7 @@ failure.
 
 ## As built (2026-09-26)
 
-- `rhylthyme bridge` ships in rhylthyme-cli-runner (the `rhylthyme` CLI, with
+- `rhylthyme bridge` ships in rhylthyme (formerly rhylthyme-cli-runner; the `rhylthyme` CLI, with
   the `[galago]` extra); the publisher, REST client and scrubber live in
   `rhylthyme_galago.bridge`.
 - `rhylthyme bridge PROGRAM --workcell W` runs one program and publishes it
